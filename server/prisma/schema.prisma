@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ContactSubmission {
+  id                 String    @id @default(cuid())
+  name               String
+  email              String
+  subject            String
+  message            String
+  sheetSynced        Boolean   @default(false)
+  sheetSyncedAt      DateTime?
+  sheetSyncError     String?
+  sheetSyncAttempts  Int       @default(0)
+  createdAt          DateTime  @default(now())
+
+  @@map("contact_submissions")
+}
+
+model Project {
+  id                 String    @id
+  title              String
+  subtitle           String?
+  category           String
+  featured           Boolean   @default(true)
+  displayOrder       Int       @default(0)
+  shortDescription   String    @db.Text
+  badges             String[]
+  techStack          String[]
+  image              String?
+  imageCaption       String?
+  githubUrl          String?
+  liveUrl            String?
+  repoStatus         String?
+  demoStatus         String?
+  caseStudy          Json?
+  sampleItems        Json?
+  auditMatrix        Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@map("projects")
+}

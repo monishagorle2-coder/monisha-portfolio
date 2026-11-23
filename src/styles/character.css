@@ -1,0 +1,195 @@
+/**
+ * Anime Character Stage & Organic Integration
+ * Seamlessly integrates Monisha's anime developer portrait into the hero section.
+ * Eliminates artificial poster borders and tech HUD frames in favor of natural crimson lighting and smooth pointer parallax.
+ */
+
+.anime-stage-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+/* Atmospheric radiance softly casting ambient crimson light behind the character */
+.anime-aura-radiance {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 115%;
+  height: 115%;
+  background: radial-gradient(circle at 55% 45%, rgba(123, 16, 27, 0.45) 0%, rgba(255, 67, 46, 0.12) 45%, transparent 72%);
+  filter: blur(55px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+@media (max-width: 992px) {
+  .anime-aura-radiance {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Seamless Character Stage (Stationary Portrait with Gaze-Tracking Eyes) */
+.anime-canvas {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: transparent;
+  /* Natural ambient drop shadow instead of a rigid boxed poster frame */
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75),
+              0 0 50px rgba(123, 16, 27, 0.3);
+  border: 1px solid rgba(123, 16, 27, 0.35);
+  /* Organic bottom mask fade to dissolve seamlessly into the hero background */
+  mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 86%, transparent 100%);
+  transform: none !important;
+}
+
+[data-theme="light"] .anime-canvas {
+  box-shadow: 0 20px 48px rgba(140, 22, 34, 0.14),
+              0 6px 16px rgba(25, 23, 22, 0.08);
+  border: 1px solid var(--color-border-crimson);
+}
+
+[data-theme="light"] .anime-aura-radiance {
+  opacity: 0.45;
+  filter: blur(65px);
+}
+
+@media (max-width: 992px) {
+  .anime-canvas {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .anime-canvas {
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 360px) {
+  .anime-canvas {
+    max-width: 250px;
+  }
+}
+
+/* Base Layer Common Rule */
+.anime-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-cinematic);
+}
+
+/* Layer 0: Atmospheric Crimson Ambient Gradient & Cosmic Sigil */
+.layer-0-backdrop {
+  z-index: 1;
+  background: radial-gradient(circle at 50% 35%, rgba(123, 16, 27, 0.45) 0%, rgba(17, 16, 16, 0.85) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.astral-sigil {
+  width: 85%;
+  height: 85%;
+  opacity: 0.18;
+  animation: sigil-rotate 90s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes sigil-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Layer 1: Ambient Floating Canvas Embers */
+.layer-1-particles {
+  z-index: 2;
+  opacity: 0.75;
+}
+
+/* Layer 2: Core Anime Character Portrait Plate */
+.layer-2-portrait {
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: contrast(1.02) brightness(1.01);
+}
+
+/* Layer 2.5: Interactive Cursor-Following Eyes (Stationary Character) */
+.eye-overlay-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.movable-pupil {
+  will-change: transform;
+}
+
+/* Layer 3: Soft Atmospheric Crimson Rim Lighting & Edge Vignette */
+.layer-3-rimlight {
+  z-index: 5;
+  background: radial-gradient(circle at 65% 35%, transparent 55%, rgba(123, 16, 27, 0.22) 85%),
+              linear-gradient(to top, #0d0c0c 0%, rgba(17, 16, 16, 0.35) 12%, transparent 35%);
+  mix-blend-mode: screen;
+}
+
+/* Touch & Coarse Pointer Handling: Keep eyes in natural resting position on touch devices */
+@media (pointer: coarse) {
+  .anime-canvas {
+    transform: none !important;
+  }
+  .movable-pupil {
+    transform: translate(0px, 0px) !important;
+  }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .astral-sigil {
+    animation: none;
+  }
+  .anime-canvas {
+    transform: none !important;
+    transition: none !important;
+  }
+  .movable-pupil {
+    transform: translate(0px, 0px) !important;
+    transition: none !important;
+  }
+}
+
+body.reduced-motion .astral-sigil {
+  animation: none;
+}
+
+body.reduced-motion .anime-canvas {
+  transform: none !important;
+  transition: none !important;
+}
+
+body.reduced-motion .movable-pupil {
+  transform: translate(0px, 0px) !important;
+  transition: none !important;
+}

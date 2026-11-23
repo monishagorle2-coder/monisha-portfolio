@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#111010" />
+  <rect x="2" y="2" width="60" height="60" rx="12" fill="none" stroke="#7B101B" stroke-width="2" />
+  <circle cx="32" cy="32" r="22" fill="#7B101B" opacity="0.4" />
+  <text x="32" y="44" font-family="'Cinzel', 'Cinzel Decorative', serif" font-size="34" font-weight="700" fill="#FFF0D5" text-anchor="middle">M</text>
+  <circle cx="32" cy="12" r="2.5" fill="#FF432E" />
+</svg>

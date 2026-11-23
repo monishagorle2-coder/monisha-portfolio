@@ -1,0 +1,297 @@
+/**
+ * Main Application Stylesheet
+ */
+
+@import './tokens.css';
+@import './reset.css';
+@import './typography.css';
+@import './components.css';
+@import './character.css';
+@import './sections.css';
+
+/* ==========================================================================
+   HERO SCENE LAYOUT
+   ========================================================================== */
+
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: calc(var(--space-10) + var(--space-4));
+  padding-bottom: var(--space-8);
+  overflow: hidden;
+}
+
+@media (max-width: 992px) {
+  .hero-section {
+    padding-top: calc(var(--space-8) + var(--space-4));
+    padding-bottom: var(--space-6);
+  }
+}
+
+/* Background Atmosphere Elements */
+.hero-ambient-glow {
+  position: absolute;
+  top: 15%;
+  left: 55%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(140, 22, 34, 0.28) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity var(--duration-base);
+}
+
+[data-theme="light"] .hero-ambient-glow {
+  opacity: 0.35;
+  filter: blur(90px);
+}
+
+@media (max-width: 1200px) {
+  .hero-ambient-glow {
+    width: 440px;
+    height: 440px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-ambient-glow {
+    width: 280px;
+    height: 280px;
+  }
+}
+
+.hero-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, var(--grid-pattern-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-pattern-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 60% 40%, black 30%, transparent 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hero Content Grid Allocation */
+.hero-content-col {
+  grid-column: span 7;
+  position: relative;
+  z-index: var(--z-content);
+}
+
+.hero-visual-col {
+  grid-column: span 5;
+  position: relative;
+  z-index: var(--z-content);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .hero-content-col {
+    grid-column: span 12;
+    order: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-visual-col {
+    grid-column: span 12;
+    order: 2;
+    margin-top: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .hero-role {
+    justify-content: center;
+  }
+
+  .hero-ctas {
+    justify-content: center;
+  }
+
+  .hero-stats-row {
+    justify-content: center;
+  }
+}
+
+/* Hero Actions & Buttons */
+.hero-ctas {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .hero-ctas {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--space-1);
+  }
+
+  .hero-ctas .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Stats Row */
+.hero-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-3);
+  width: 100%;
+  max-width: 540px;
+}
+
+@media (max-width: 480px) {
+  .hero-stats-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   DESIGN SYSTEM TOKEN INSPECTOR (Modal/Drawer)
+   ========================================================================== */
+
+.tokens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.token-swatch {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.swatch-color {
+  height: 48px;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.swatch-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-cream);
+  font-weight: 600;
+}
+
+.swatch-hex {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.swatch-usage {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+.spec-section {
+  margin-bottom: var(--space-4);
+}
+
+.spec-section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-cream);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* Layer Architecture Table */
+.layer-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  margin-top: var(--space-2);
+}
+
+.layer-table th,
+.layer-table td {
+  padding: var(--space-1) var(--space-2);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.layer-table th {
+  font-family: var(--font-mono);
+  color: var(--color-cream);
+  background: rgba(123, 16, 27, 0.2);
+}
+
+.layer-table td {
+  color: var(--color-text-muted);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.status-badge.simulated {
+  background: rgba(255, 67, 46, 0.2);
+  color: var(--color-flame);
+  border: 1px solid rgba(255, 67, 46, 0.4);
+}
+
+.status-badge.planned {
+  background: rgba(255, 240, 213, 0.1);
+  color: var(--color-cream);
+  border: 1px solid rgba(255, 240, 213, 0.3);
+}
+
+/* Footer / Dev info strip */
+.site-footer {
+  border-top: 1px solid var(--color-border-subtle);
+  padding: var(--space-4) 0;
+  background: var(--color-surface-1);
+}
+
+.footer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.footer-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
