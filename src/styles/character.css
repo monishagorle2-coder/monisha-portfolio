@@ -147,6 +147,35 @@
   will-change: transform;
 }
 
+/* Natural Anime Blinking Animation */
+.eye-blink-group {
+  will-change: transform;
+}
+
+.right-eye-blink {
+  transform-origin: 504px 417px;
+}
+
+.left-eye-blink {
+  transform-origin: 584px 424px;
+}
+
+.eye-blink-active {
+  animation: anime-blink 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes anime-blink {
+  0% {
+    transform: scaleY(1);
+  }
+  45% {
+    transform: scaleY(0.04);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
 /* Layer 3: Soft Atmospheric Crimson Rim Lighting & Edge Vignette */
 .layer-3-rimlight {
   z-index: 5;
@@ -163,6 +192,11 @@
   .movable-pupil {
     transform: translate(0px, 0px) !important;
   }
+  .eye-blink-group,
+  .eye-blink-active {
+    animation: none !important;
+    transform: none !important;
+  }
 }
 
 /* Reduced Motion Override */
@@ -178,6 +212,12 @@
     transform: translate(0px, 0px) !important;
     transition: none !important;
   }
+  .eye-blink-group,
+  .eye-blink-active {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 body.reduced-motion .astral-sigil {
@@ -191,5 +231,12 @@ body.reduced-motion .anime-canvas {
 
 body.reduced-motion .movable-pupil {
   transform: translate(0px, 0px) !important;
+  transition: none !important;
+}
+
+body.reduced-motion .eye-blink-group,
+body.reduced-motion .eye-blink-active {
+  animation: none !important;
+  transform: none !important;
   transition: none !important;
 }

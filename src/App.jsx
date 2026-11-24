@@ -107,9 +107,11 @@ export const App = () => {
     }
   }, []);
 
-  // Robust document-relative scroll tracking (fixes transformed offsetParent bug)
+  // Robust document-relative scroll tracking throttled via requestAnimationFrame
   useEffect(() => {
-    const handleScroll = () => {
+    let ticking = false;
+
+    const updateScrollMetrics = () => {
       const scrollY = window.scrollY;
       const docHeight = document.documentElement.scrollHeight;
       const winHeight = window.innerHeight;
@@ -121,19 +123,21 @@ export const App = () => {
       }
 
       // 1. If at top of page, hero is always active
-      if (scrollY < 120) {
+      if (scrollY < 100) {
         setActiveSection('hero');
+        ticking = false;
         return;
       }
 
       // 2. If at bottom of page, contact is active
-      if (winHeight + scrollY >= docHeight - 60) {
+      if (winHeight + scrollY >= docHeight - 50) {
         setActiveSection('contact');
+        ticking = false;
         return;
       }
 
       // 3. Document-relative position calculation using getBoundingClientRect
-      const targetY = scrollY + Math.min(320, winHeight * 0.38);
+      const targetY = scrollY + Math.min(300, winHeight * 0.35);
       let matchedSection = 'hero';
 
       for (let i = 0; i < SECTIONS.length; i++) {
@@ -148,10 +152,18 @@ export const App = () => {
       }
 
       setActiveSection(matchedSection);
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollMetrics);
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    updateScrollMetrics();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

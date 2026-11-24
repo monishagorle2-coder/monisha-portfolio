@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 const CHAPTERS = [
   { id: 'hero', num: '01', label: 'Hero' },
@@ -9,41 +9,7 @@ const CHAPTERS = [
   { id: 'contact', num: '06', label: 'Contact' }
 ];
 
-export const ChapterProgress = ({ activeSection: controlledActive, scrollProgress: controlledProgress }) => {
-  const [internalActive, setInternalActive] = useState('hero');
-  const [internalProgress, setInternalProgress] = useState(0);
-
-  const activeSection = controlledActive !== undefined ? controlledActive : internalActive;
-  const scrollProgress = controlledProgress !== undefined ? controlledProgress : internalProgress;
-
-  useEffect(() => {
-    if (controlledActive !== undefined && controlledProgress !== undefined) return;
-
-    const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (totalScroll > 0) {
-        const currentProgress = (window.scrollY / totalScroll) * 100;
-        setInternalProgress(Math.min(100, Math.max(0, currentProgress)));
-      }
-
-      const scrollPosition = window.scrollY + 280;
-      for (let i = CHAPTERS.length - 1; i >= 0; i--) {
-        const el = document.getElementById(CHAPTERS[i].id);
-        if (el) {
-          const top = el.offsetTop;
-          if (scrollPosition >= top) {
-            setInternalActive(CHAPTERS[i].id);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [controlledActive, controlledProgress]);
-
+export const ChapterProgress = ({ activeSection = 'hero', scrollProgress = 0 }) => {
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {

@@ -1,17 +1,20 @@
 /**
- * Character Eye Gaze Controller (Refined Phase 3)
+ * Character Eye Gaze & Natural Blinking Controller (Refined Phase 2)
  * 
- * Implements natural, coordinated cursor-following anime eyes while keeping
- * the character head, body, and overall portrait plate 100% stationary.
+ * Implements natural, synchronized conjugate cursor-following anime eyes
+ * and organic eyelid blinking while keeping the character head, body,
+ * and overall portrait plate 100% stationary.
  * 
  * Key Principles:
- * 1. Only the pupils move (portrait plate stays completely stationary).
- * 2. Strict ocular boundaries: Horizontal & vertical limits calibrated to eye sockets.
- * 3. Coordinated binocular gaze: Both eyes track the exact same directional angle,
- *    preventing any unnatural cross-eyed or divergent movement.
- * 4. Wide viewport reach: Smooth, gradual gaze transition across desktop.
- * 5. Smooth damped easing: Pupils gracefully return to neutral resting (0, 0) when pointer leaves.
- * 6. Disabled on touch/mobile devices and strictly respects prefers-reduced-motion.
+ * 1. Synchronized Conjugate Gaze: Both pupils share the exact same directional
+ *    angle vector, eliminating any cross-eyed divergence.
+ * 2. Scroll-Aware Stability: Actively monitors scroll and resize. When hero is in view,
+ *    eyes smoothly track relative to scroll position. When hero scrolls out of view,
+ *    pupils smoothly return to neutral center (0, 0) without sudden jumps or drift.
+ * 3. Natural Organic Blinking: Random anime-style eyelid blink cycles (every 3.5s–5.5s)
+ *    scaling the eyeball under the upper eyelid with a rapid 180ms closure.
+ * 4. Strict Accessibility: Completely disabled under prefers-reduced-motion and
+ *    on touch/coarse pointers.
  */
 
 export class CharacterParallaxController {
@@ -20,17 +23,24 @@ export class CharacterParallaxController {
     this.heroSection = null;
     this.rightPupil = null;
     this.leftPupil = null;
+    this.rightEyeBlink = null;
+    this.leftEyeBlink = null;
 
     this.isReducedMotion = false;
     this.isCoarsePointer = false;
     this.rafId = null;
+    this.blinkTimeout = null;
+
+    // Track last known pointer coordinates for scroll recalculation
+    this.lastPointerX = null;
+    this.lastPointerY = null;
+    this.isPointerActive = false;
 
     // Target pupil offsets (SVG coordinates)
     this.targetRightX = 0;
     this.targetRightY = 0;
     this.targetLeftX = 0;
     this.targetLeftY = 0;
-    this.isPointerActive = false;
 
     // Current interpolated offsets (smoothed with lerp)
     this.currentRightX = 0;
@@ -40,6 +50,8 @@ export class CharacterParallaxController {
 
     this.onMouseMove = this.handleMouseMove.bind(this);
     this.onMouseLeave = this.handleMouseLeave.bind(this);
+    this.onScroll = this.handleScroll.bind(this);
+    this.onResize = this.handleResize.bind(this);
     this.animate = this.animate.bind(this);
 
     this.init();
@@ -51,9 +63,11 @@ export class CharacterParallaxController {
     // Lock container to stationary (no whole-image tilt or parallax)
     this.container.style.transform = 'none';
 
-    // Locate the movable pupil elements inside SVG overlay
+    // Locate the movable pupil elements and blink groups inside SVG overlay
     this.rightPupil = this.container.querySelector('#rightPupilGroup');
     this.leftPupil = this.container.querySelector('#leftPupilGroup');
+    this.rightEyeBlink = this.container.querySelector('#rightEyeBlinkGroup');
+    this.leftEyeBlink = this.container.querySelector('#leftEyeBlinkGroup');
 
     // Detect touch / coarse pointers
     if (typeof window !== 'undefined' && window.matchMedia) {
@@ -77,15 +91,25 @@ export class CharacterParallaxController {
     this.heroSection = this.container.closest('.hero-section') || document.getElementById('hero') || this.container;
 
     window.addEventListener('mousemove', this.onMouseMove, { passive: true });
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+    window.addEventListener('resize', this.onResize, { passive: true });
     document.addEventListener('mouseleave', this.onMouseLeave, { passive: true });
 
     this.rafId = requestAnimationFrame(this.animate);
+    this.scheduleBlink();
   }
 
   setReducedMotion(enabled) {
     this.isReducedMotion = enabled;
     if (enabled) {
       this.resetTransforms();
+      if (this.blinkTimeout) {
+        clearTimeout(this.blinkTimeout);
+        this.blinkTimeout = null;
+      }
+      this.removeBlinkClasses();
+    } else {
+      this.scheduleBlink();
     }
   }
 
@@ -99,6 +123,8 @@ export class CharacterParallaxController {
     this.currentLeftX = 0;
     this.currentLeftY = 0;
     this.isPointerActive = false;
+    this.lastPointerX = null;
+    this.lastPointerY = null;
 
     if (this.container) {
       this.container.style.transform = 'none';
@@ -114,20 +140,61 @@ export class CharacterParallaxController {
   handleMouseMove(e) {
     if (this.isReducedMotion || this.isCoarsePointer || !this.container) return;
 
+    this.lastPointerX = e.clientX;
+    this.lastPointerY = e.clientY;
+
+    this.updateGaze(e.clientX, e.clientY);
+  }
+
+  handleScroll() {
+    if (this.isReducedMotion || this.isCoarsePointer || !this.container) return;
+
     if (!this.heroSection) {
       this.heroSection = document.getElementById('hero') || this.container.closest('.hero-section');
     }
 
     const heroRect = this.heroSection ? this.heroSection.getBoundingClientRect() : null;
 
-    // If pointer moves below hero section or off-screen, smoothly ease back to neutral resting
-    if (heroRect && (e.clientY < heroRect.top - 100 || e.clientY > heroRect.bottom || heroRect.bottom < 60)) {
+    // If hero section has scrolled out of view, smoothly ease pupils back to resting center
+    if (!heroRect || heroRect.bottom < 60 || heroRect.top > window.innerHeight) {
+      this.targetRightX = 0;
+      this.targetRightY = 0;
+      this.targetLeftX = 0;
+      this.targetLeftY = 0;
+      this.isPointerActive = false;
+      return;
+    }
+
+    // If cursor is known and hero is in view, re-evaluate gaze angle relative to the new scroll position
+    if (this.lastPointerX !== null && this.lastPointerY !== null) {
+      this.updateGaze(this.lastPointerX, this.lastPointerY);
+    }
+  }
+
+  handleResize() {
+    if (this.lastPointerX !== null && this.lastPointerY !== null) {
+      this.updateGaze(this.lastPointerX, this.lastPointerY);
+    }
+  }
+
+  updateGaze(clientX, clientY) {
+    if (this.isReducedMotion || this.isCoarsePointer || !this.container) return;
+
+    if (!this.heroSection) {
+      this.heroSection = document.getElementById('hero') || this.container.closest('.hero-section');
+    }
+
+    const heroRect = this.heroSection ? this.heroSection.getBoundingClientRect() : null;
+    const rect = this.container.getBoundingClientRect();
+
+    // If hero is out of bounds or container is completely off-screen, return to neutral
+    if (!heroRect || heroRect.bottom < 60 || heroRect.top > window.innerHeight || rect.bottom < 0 || rect.top > window.innerHeight) {
       this.handleMouseLeave();
       return;
     }
 
-    const rect = this.container.getBoundingClientRect();
-    if (rect.bottom < 0 || rect.top > window.innerHeight) {
+    // If cursor moves beyond hero boundary, smoothly return eyes to resting
+    if (clientY < heroRect.top - 80 || clientY > heroRect.bottom + 40) {
       this.handleMouseLeave();
       return;
     }
@@ -138,42 +205,78 @@ export class CharacterParallaxController {
     const midEyeY = rect.top + rect.height * 0.358;
 
     // Vector from eyes center to pointer
-    const deltaX = e.clientX - midEyeX;
-    const deltaY = e.clientY - midEyeY;
+    const deltaX = clientX - midEyeX;
+    const deltaY = clientY - midEyeY;
 
-    // Natural viewport-calibrated reach radius:
-    // Allows gradual, subtle gaze shifting across entire desktop without hard saturation
-    const reachX = Math.max(550, window.innerWidth * 0.5);
-    const reachY = Math.max(380, window.innerHeight * 0.45);
+    // Viewport-calibrated reach radius:
+    // Provides smooth, gradual gaze shifting across desktop without sudden saturation
+    const reachX = Math.max(500, window.innerWidth * 0.45);
+    const reachY = Math.max(350, window.innerHeight * 0.4);
 
     const normDist = Math.min(1.0, Math.hypot(deltaX / reachX, deltaY / reachY));
     const angle = Math.atan2(deltaY, deltaX);
 
     // Subtle non-linear easing for natural responsiveness
-    const gazeStrength = Math.pow(normDist, 0.9);
+    const gazeStrength = Math.pow(normDist, 0.85);
     const dirX = Math.cos(angle) * gazeStrength;
     const dirY = Math.sin(angle) * gazeStrength;
 
-    // Strictly coordinated ocular bounds:
-    // Right eye (closer, primary): max ±4.2px horizontal, ±2.4px vertical
-    // Left eye (3/4 angle, secondary): max ±3.6px horizontal, ±2.0px vertical
-    // Both pupils share the exact same directional angle, guaranteeing zero cross-eyed distortion!
-    this.targetRightX = dirX * 4.2;
-    this.targetRightY = dirY * 2.4;
+    // Synchronized Conjugate Ocular Displacement:
+    // Both pupils share the EXACT same directional angle and proportional displacement.
+    // Right Eye (primary, closer in 3/4 perspective): max 3.8px horizontal, 2.0px vertical
+    // Left Eye (foreshortened 3/4 perspective): max 3.2px horizontal, 1.7px vertical
+    // This maintains visual convergence and eliminates divergent cross-eyed distortion!
+    this.targetRightX = dirX * 3.8;
+    this.targetRightY = dirY * 2.0;
 
-    this.targetLeftX = dirX * 3.6;
-    this.targetLeftY = dirY * 2.0;
+    this.targetLeftX = dirX * 3.2;
+    this.targetLeftY = dirY * 1.7;
 
     this.isPointerActive = true;
   }
 
   handleMouseLeave() {
-    // Smoothly ease eyes back to default resting gaze when pointer leaves
     this.targetRightX = 0;
     this.targetRightY = 0;
     this.targetLeftX = 0;
     this.targetLeftY = 0;
     this.isPointerActive = false;
+  }
+
+  scheduleBlink() {
+    if (this.isReducedMotion || this.isCoarsePointer) return;
+
+    if (this.blinkTimeout) clearTimeout(this.blinkTimeout);
+
+    // Random interval between 3200ms and 5600ms
+    const interval = Math.random() * 2400 + 3200;
+    this.blinkTimeout = setTimeout(() => {
+      this.triggerBlink();
+      this.scheduleBlink();
+    }, interval);
+  }
+
+  triggerBlink() {
+    if (this.isReducedMotion || this.isCoarsePointer) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+
+    if (this.rightEyeBlink && this.leftEyeBlink) {
+      this.rightEyeBlink.classList.add('eye-blink-active');
+      this.leftEyeBlink.classList.add('eye-blink-active');
+
+      setTimeout(() => {
+        this.removeBlinkClasses();
+      }, 180);
+    }
+  }
+
+  removeBlinkClasses() {
+    if (this.rightEyeBlink) {
+      this.rightEyeBlink.classList.remove('eye-blink-active');
+    }
+    if (this.leftEyeBlink) {
+      this.leftEyeBlink.classList.remove('eye-blink-active');
+    }
   }
 
   animate() {
@@ -226,7 +329,13 @@ export class CharacterParallaxController {
     if (this.rafId) {
       cancelAnimationFrame(this.rafId);
     }
+    if (this.blinkTimeout) {
+      clearTimeout(this.blinkTimeout);
+    }
+    this.removeBlinkClasses();
     window.removeEventListener('mousemove', this.onMouseMove);
+    window.removeEventListener('scroll', this.onScroll);
+    window.removeEventListener('resize', this.onResize);
     document.removeEventListener('mouseleave', this.onMouseLeave);
   }
 }

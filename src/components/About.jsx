@@ -1,6 +1,7 @@
 import React from 'react';
 import { profileData } from '../data/profileData';
 import { GraduationCap, Code2, ShieldAlert, BookOpen, CheckCircle2 } from 'lucide-react';
+import { DeveloperTerminal } from './DeveloperTerminal';
 
 export const About = () => {
   return (
@@ -86,6 +87,9 @@ export const About = () => {
                 <span className="status-tag">Undergraduate (2023–2027)</span>
               </div>
             </div>
+
+            {/* Interactive Developer Terminal (Phase 4) */}
+            <DeveloperTerminal />
           </div>
 
         </div>

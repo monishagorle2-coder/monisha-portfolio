@@ -283,14 +283,16 @@ export const Hero = ({ isReducedMotion, onReplayIntro, startTyping = true, repla
                   </defs>
 
                   {/* RIGHT EYE (Viewer Left) */}
-                  <path d="M 466,417 C 480,410 505,406 536,414 C 541,416 545,419 542,422 C 536,436 518,444 494,440 C 480,436 470,425 466,417 Z" fill="url(#heroScleraGrad)" />
-                  <g clipPath="url(#heroRightEyeClip)">
-                    <g id="rightPupilGroup" className="movable-pupil">
-                      <ellipse cx="523.5" cy="431" rx="11.5" ry="14" fill="url(#heroIrisGrad)" />
-                      <ellipse cx="524" cy="430.5" rx="6" ry="8" fill="#070303" />
-                      <circle cx="519" cy="425.5" r="3" fill="#ffffff" />
-                      <circle cx="528" cy="434" r="1.6" fill="rgba(255, 235, 220, 0.8)" />
-                      <ellipse cx="523.5" cy="440" rx="7" ry="3.5" fill="rgba(255, 67, 46, 0.45)" />
+                  <g className="eye-blink-group right-eye-blink" id="rightEyeBlinkGroup">
+                    <path d="M 466,417 C 480,410 505,406 536,414 C 541,416 545,419 542,422 C 536,436 518,444 494,440 C 480,436 470,425 466,417 Z" fill="url(#heroScleraGrad)" />
+                    <g clipPath="url(#heroRightEyeClip)">
+                      <g id="rightPupilGroup" className="movable-pupil">
+                        <ellipse cx="523.5" cy="431" rx="11.5" ry="14" fill="url(#heroIrisGrad)" />
+                        <ellipse cx="524" cy="430.5" rx="6" ry="8" fill="#070303" />
+                        <circle cx="519" cy="425.5" r="3" fill="#ffffff" />
+                        <circle cx="528" cy="434" r="1.6" fill="rgba(255, 235, 220, 0.8)" />
+                        <ellipse cx="523.5" cy="440" rx="7" ry="3.5" fill="rgba(255, 67, 46, 0.45)" />
+                      </g>
                     </g>
                   </g>
                   <path d="M 462,419 C 476,410 505,404 538,413 C 543,415 547,418 544,421 C 538,418 505,407 472,416 Z" fill="#080303" />
@@ -298,12 +300,14 @@ export const Hero = ({ isReducedMotion, onReplayIntro, startTyping = true, repla
                   <path d="M 470,421 C 488,435 514,441 540,424" fill="none" stroke="rgba(25, 12, 12, 0.8)" strokeWidth="1.4" />
 
                   {/* LEFT EYE (Viewer Right) */}
-                  <path d="M 572,429 C 576,424 584,421 594,425 C 596,428 594,433 590,436 C 583,438 576,435 572,429 Z" fill="url(#heroScleraGrad)" />
-                  <g clipPath="url(#heroLeftEyeClip)">
-                    <g id="leftPupilGroup" className="movable-pupil">
-                      <ellipse cx="583" cy="430" rx="6.5" ry="8" fill="url(#heroIrisGrad)" />
-                      <ellipse cx="583" cy="430" rx="3.5" ry="4.5" fill="#070303" />
-                      <circle cx="580.5" cy="427" r="1.8" fill="#ffffff" />
+                  <g className="eye-blink-group left-eye-blink" id="leftEyeBlinkGroup">
+                    <path d="M 572,429 C 576,424 584,421 594,425 C 596,428 594,433 590,436 C 583,438 576,435 572,429 Z" fill="url(#heroScleraGrad)" />
+                    <g clipPath="url(#heroLeftEyeClip)">
+                      <g id="leftPupilGroup" className="movable-pupil">
+                        <ellipse cx="583" cy="430" rx="6.5" ry="8" fill="url(#heroIrisGrad)" />
+                        <ellipse cx="583" cy="430" rx="3.5" ry="4.5" fill="#070303" />
+                        <circle cx="580.5" cy="427" r="1.8" fill="#ffffff" />
+                      </g>
                     </g>
                   </g>
                   <path d="M 570,429 C 575,424 584,421 595,426 C 596,428 594,430 591,428 C 583,424 575,426 571,430 Z" fill="#080303" />

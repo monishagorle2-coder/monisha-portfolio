@@ -250,6 +250,12 @@
   align-items: start;
 }
 
+.about-narrative-col,
+.about-card-col {
+  min-width: 0;
+  width: 100%;
+}
+
 @media (max-width: 992px) {
   .about-grid {
     grid-template-columns: 1fr;
